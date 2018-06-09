@@ -2,29 +2,26 @@ import requests
 import openpyxl
 from requests_toolbelt import MultipartEncoder
 
-file='../省内不限量外呼分配4.19.xlsx'
-sheet='2015年以后'
-login_data={'operator_id':'Account','password':'Password'}
+file='excel file'
+sheet='Sheet1'
 
-# API of website
-get_cookies_url='http://183.207.196.70:8085/haywdjpt/login!login.jspa'
-post1_referer_url='http://183.207.196.70:8085/haywdjpt/gxdj/ywdj!checkYwMsisdn.jspa'
-post2_referer_url='http://183.207.196.70:8085/haywdjpt/gxdj/ywdj!saveLogin.jspa'
-test_login='http://183.207.196.70:8085/haywdjpt/gxdj/ywdj!frame.jspa'
+#读取Excel
+def excel_data(file,sheet):
+    wb=openpyxl.load_workbook(filename=file)
+    sheet_ranges=wb[sheet]
+    return(sheet_ranges)
 
-# open the excel
-wb=openpyxl.load_workbook(filename=file)
-sheet_ranges=wb[sheet]
-
-# login in
-multiFormData=MultipartEncoder(fields=multiFiles)
-session=requests.session()
-session.post(get_cookies_url,data=login_data)
+for i in range(2,32):
+    excel=excel_data(file,sheet)
+    if(excel['F'+str(i)].value in ['√']):
+        phoneNumber=str(excel['C'+str(i)].value)
+        print(phoneNumber)
+    else:
+        continue
     
-for i in range(898,1123):
-    phoneNumber=str(sheet_ranges['A'+str(i)].value)
-    
-    paramater={'msisdn':phoneNumber,'yw_id':'1761','bl_time':'2018-05-07'}
+    paramater={'msisdn':phoneNumber,'yw_id':'1761','bl_time':'2018-06-08'}
+
+    login_data={'operator_id':'user','password':'password'}
     multiFiles={
             'region_id':'1210',
             'school_id':'295',
@@ -32,6 +29,16 @@ for i in range(898,1123):
             'fzr_id':login_data['operator_id'],
             'fzr_name':login_data['operator_id']
         }
+
+    # API of website
+    get_cookies_url='http://183.207.196.70:8085/haywdjpt/login!login.jspa'
+    post1_referer_url='http://183.207.196.70:8085/haywdjpt/gxdj/ywdj!checkYwMsisdn.jspa'
+    post2_referer_url='http://183.207.196.70:8085/haywdjpt/gxdj/ywdj!saveLogin.jspa'
+    test_login='http://183.207.196.70:8085/haywdjpt/gxdj/ywdj!frame.jspa'
+
+    multiFormData=MultipartEncoder(fields=multiFiles)
+    session=requests.session()
+    session.post(get_cookies_url,data=login_data)
 
     res=session.post(post1_referer_url,data=paramater)
     if res.text=='0':
