@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*- 
 # 登陆淮阴工学院上网认证系统
-import requests
+from urllib import request, parse
 userName=input("Your userName: ")
 pwd=input("Your password: ")
 rememberPwd=input("Whether Remember login status? (1=true,0=false): ")
@@ -11,5 +12,7 @@ post_data={
     'pwd':pwd,
     'rememberPwd':rememberPwd
 }
-res=requests.post(post_url,data=post_data)
-print(res.text)
+data = parse.urlencode(post_data).encode('utf-8')
+req=request.Request(post_url,data=data)
+page=request.urlopen(req).read()
+print(page.decode('utf-8'))
