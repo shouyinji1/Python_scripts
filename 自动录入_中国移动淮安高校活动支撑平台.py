@@ -2,11 +2,11 @@ import requests
 import openpyxl
 from requests_toolbelt import MultipartEncoder
 
-login_data={'operator_id':'User','password':'Password'}
-file='File Name'
-sheet='Sheet1'
-min_range=1589
-max_range=1627
+login_data={'operator_id':'账号','password':'密码'}	# 账号密码
+file='文件路径'	# 文件路径
+sheet='Sheet1'	# 表格
+min_range=1	# 首列
+max_range=278	# 尾列+1
 
 
 # API of website
@@ -27,16 +27,16 @@ def excel_data(file,sheet):
 
 for i in range(min_range,max_range):
 	excel=excel_data(file,sheet)
-	if(excel['I'+str(i)].value in ['同意']): #筛选条件
-		phoneNumber=str(excel['A'+str(i)].value) #获取号码
+	if(excel['R'+str(i)].value in ['2018级新生号卡使用/插卡'] or excel['S'+str(i)].value in ['2018级新生号卡使用/插卡']): #筛选条件
+		phoneNumber=str(excel['M'+str(i)].value) #获取号码
 		print(phoneNumber)
 	else:
 		continue
 
 	paramater={
 		'msisdn':phoneNumber,
-		'yw_id':'1761',	# 业务名称
-		'bl_time':'2018-07-21'	# 办理时间
+		'yw_id':'1823',	# 业务名称代号，2018级新生号卡使用/插卡
+		'bl_time':'2018-08-20'	# 办理时间
 	}
 
 	multiFiles={
