@@ -118,5 +118,5 @@ if __name__ == '__main__':
         except Exception as e:
             print(e)
         f.write("\n")
-        time.sleep(1)
+        time.sleep(random.randint(1,10))
     f.close()
