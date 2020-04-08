@@ -8,6 +8,7 @@ from fake_useragent import UserAgent
 import requests
 import random
 import time
+import pyttsx3
 
 def words(file):
     soup=BeautifulSoup(open(file),'html.parser')
@@ -84,11 +85,19 @@ class BingDict:
     def __init__(self,word):
         pass 
 
+# 语音播报，用于结束时
+def alert():
+    words='Eudic\'s glossary generated successfully!'
+    engine=pyttsx3.init()
+    rate=engine.getProperty('rate')
+    engine.setProperty('rate',rate-50)
+    engine.say(words)
+    engine.runAndWait()
+
 
 if __name__ == '__main__':
     f=open("words.txt","w+")
-    for i in words("Print.html")[:50]:
-    #for i in ['crackdown','abortion']:
+    for i in words("Print.html")[100:160]:
         print(i)
         eudic=Eudic(i);
 
@@ -120,3 +129,4 @@ if __name__ == '__main__':
         f.write("\n")
         time.sleep(random.randint(1,10))
     f.close()
+    alert()
