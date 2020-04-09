@@ -83,19 +83,62 @@ class Eudic:
 
 class BingDict:
     def __init__(self,word):
-        pass 
+        bingDict=requests.get("https://www.bing.com/dict/search?q="+word).text
+        self.soup=BeautifulSoup(bingDict,'html.parser')
+
+    def getPhonetic(self):
+        phonetic=[]
+        sound_US=self.soup.find_all(class_='hd_prUS b_primtxt') # 美式读音
+        sound_UK=self.soup.find_all(class_='hd_pr b_primtxt')   # 英式读音
+        phonetic.append(self.__extractPhonetic(sound_US[0].contents[0]))
+        phonetic.append(self.__extractPhonetic(sound_UK[0].contents[0]))
+        return phonetic
+
+    def getDefinition(self):
+        soup=self.soup.find_all(class_='qdef')[0].ul
+        pos=soup.find_all(class_='pos')    # 所有词性
+        for i in range(len(pos)):
+            pos[i]=pos[i].contents[0]
+            
+        def_b_regtxt=soup.find_all(class_='def b_regtxt')  # 所有释义
+        for i in range(len(def_b_regtxt)):
+            def_b_regtxt[i]=def_b_regtxt[i].contents[0].contents[0]
+        return pos,def_b_regtxt
+
+    def getSentences(self):
+        sentence=[]
+        soup=self.soup.find_all(id='sentenceSeg')[0].find_all(class_='se_li')
+        #sen=random.choice(soup)
+        for sen in soup:
+            sen_en=sen.find_all(class_='sen_en b_regtxt')[0]
+            sen_cn=sen.find_all(class_='sen_cn b_regtxt')[0]
+            sentence.append([self.__extractTextOfSentence(sen_en),self.__extractTextOfSentence(sen_cn)])
+        return sentence
+        
+    def __extractTextOfSentence(self,sentence):
+        sentence=sentence.find_all()
+        text=''
+        for i in sentence:
+            text+=str(i.contents[0])
+        return text
+
+    def __extractPhonetic(self,phonetic):
+        begin=phonetic.find('[')
+        end=phonetic.rfind(']')
+        ph=phonetic[begin:end+1]
+        return ph
+
 
 # 语音播报，用于结束时
 def alert():
-    words='Eudic\'s glossary generated successfully!'
+    words='Glossary generated successfully!'
     engine=pyttsx3.init()
     rate=engine.getProperty('rate')
     engine.setProperty('rate',rate-50)
     engine.say(words)
     engine.runAndWait()
 
-
-if __name__ == '__main__':
+def eudicWrite():
     f=open("words.txt","w+")
     for i in words("Print.html")[100:160]:
         print(i)
@@ -129,4 +172,41 @@ if __name__ == '__main__':
         f.write("\n")
         time.sleep(random.randint(1,10))
     f.close()
+
+def bingDictWrite():
+    f=open("words.txt","w+")
+    for i in words("Print.html")[100:110]:
+        print(i)
+        bingDict=BingDict(i)
+
+        # 写入单词
+        f.write(i)
+        try:
+            # 写入音标
+            phonetic=bingDict.getPhonetic()
+            for j in phonetic:
+                f.write(j)
+            f.write("\n")
+
+            # 写入释义
+            exp=bingDict.getDefinition()
+            expLen=len(exp[0])
+            for i in range(expLen):
+                if exp[0][i]=='网络':
+                    exp[0][i]='Web.'
+                f.write('\t'+exp[0][i]+' '+exp[1][i]+'\n')
+
+            # 写入例句
+            sentences=random.sample(bingDict.getSentences(),expLen-1)
+            for sentence in sentences:
+                f.write("\te.g. "+str(sentence[0])+"\n")
+                f.write("\t    "+str(sentence[1])+'\n')
+        except Exception as e:
+            print(e)
+        time.sleep(random.randint(1,5))
+    f.close()
+
+
+if __name__ == '__main__':
+    bingDictWrite()
     alert()
