@@ -86,6 +86,9 @@ class BingDict:
         bingDict=requests.get("https://www.bing.com/dict/search?q="+word).text
         self.soup=BeautifulSoup(bingDict,'html.parser')
 
+    def getWord(self):
+        return self.soup.find('div',id='headword').get_text()
+
     def getPhonetic(self):
         phonetic=[]
         sound_US=self.soup.find_all(class_='hd_prUS b_primtxt') # 美式读音
@@ -125,8 +128,7 @@ class BingDict:
     def __extractPhonetic(self,phonetic):
         begin=phonetic.find('[')
         end=phonetic.rfind(']')
-        ph=phonetic[begin:end+1]
-        return ph
+        return phonetic[begin:end+1]
 
 
 # 语音播报，用于结束时
@@ -141,7 +143,6 @@ def alert():
 def eudicWrite():
     f=open("words.txt","w+")
     for i in words("Print.html")[100:160]:
-        print(i)
         eudic=Eudic(i);
 
         # 写入单词
@@ -175,12 +176,14 @@ def eudicWrite():
 
 def bingDictWrite():
     f=open("words.txt","w+")
-    for i in words("Print.html")[100:110]:
-        print(i)
+    for i in words("Print.html")[1:60]:
         bingDict=BingDict(i)
 
         # 写入单词
-        f.write(i)
+        word=bingDict.getWord()
+        f.write(word)
+        print(word)
+
         try:
             # 写入音标
             phonetic=bingDict.getPhonetic()
@@ -190,18 +193,21 @@ def bingDictWrite():
 
             # 写入释义
             exp=bingDict.getDefinition()
-            expLen=len(exp[0])
-            for i in range(expLen):
+            sentenceCount=len(exp[0])
+            for i in range(len(exp[0])):
                 if exp[0][i]=='网络':
                     exp[0][i]='Web.'
                 f.write('\t'+exp[0][i]+' '+exp[1][i]+'\n')
 
             # 写入例句
-            sentences=random.sample(bingDict.getSentences(),expLen-1)
+            if sentenceCount==1:
+                sentenceCount=2
+            sentences=random.sample(bingDict.getSentences(),sentenceCount-1)
             for sentence in sentences:
                 f.write("\te.g. "+str(sentence[0])+"\n")
                 f.write("\t    "+str(sentence[1])+'\n')
         except Exception as e:
+            f.write('\n')
             print(e)
         time.sleep(random.randint(1,5))
     f.close()
