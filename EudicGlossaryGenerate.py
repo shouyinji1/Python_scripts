@@ -111,7 +111,6 @@ class BingDict:
     def getSentences(self):
         sentence=[]
         soup=self.soup.find_all(id='sentenceSeg')[0].find_all(class_='se_li')
-        #sen=random.choice(soup)
         for sen in soup:
             sen_en=sen.find_all(class_='sen_en b_regtxt')[0]
             sen_cn=sen.find_all(class_='sen_cn b_regtxt')[0]
@@ -189,6 +188,9 @@ def bingDictWrite():
             phonetic=bingDict.getPhonetic()
             for j in phonetic:
                 f.write(j)
+            # 如果查找单词与原单词不同，写入原单词
+            if word != i:
+                f.write(' From: '+i)
             f.write("\n")
 
             # 写入释义
