@@ -174,16 +174,20 @@ def eudicWrite():
     f.close()
 
 def bingDictWrite():
+    print('From lines:',end=' ')
+    firstWord=int(input())
+    print('To:',end=' ')
+    lastestWord=int(input())
+
     f=open("words.txt","w+")
-    for i in words("Print.html")[1:60]:
+    for i in words("Print.html")[firstWord:lastestWord]:
+        print(i)
         bingDict=BingDict(i)
-
-        # 写入单词
-        word=bingDict.getWord()
-        f.write(word)
-        print(word)
-
         try:
+            # 写入单词
+            word=bingDict.getWord()
+            f.write(word)
+
             # 写入音标
             phonetic=bingDict.getPhonetic()
             for j in phonetic:
